@@ -2,9 +2,9 @@
   "name": "editor-analyser",
   "version": "1.0.0",
   "description": "Here is the repo for analysing editor syntax like markdown.",
-  "main": "main.js",
+  "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "webpack": "webpack"
   },
   "repository": {
     "type": "git",
@@ -19,5 +19,9 @@
   "bugs": {
     "url": "https://github.com/nanzhangren/EditorAnalyser/issues"
   },
-  "homepage": "https://github.com/nanzhangren/EditorAnalyser#readme"
+  "homepage": "https://github.com/nanzhangren/EditorAnalyser#readme",
+  "devDependencies": {
+    "webpack-cli": "^3.1.0",
+    "webpack": "^4.19.0"
+  }
 }
