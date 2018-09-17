@@ -1,0 +1,23 @@
+{
+  "name": "editor-analyser",
+  "version": "1.0.0",
+  "description": "Here is the repo for analysing editor syntax like markdown.",
+  "main": "main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nanzhangren/EditorAnalyser.git"
+  },
+  "keywords": [
+    "editor",
+    "markdown"
+  ],
+  "author": "Zero Zhang",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/nanzhangren/EditorAnalyser/issues"
+  },
+  "homepage": "https://github.com/nanzhangren/EditorAnalyser#readme"
+}
