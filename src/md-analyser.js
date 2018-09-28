@@ -18,6 +18,16 @@ function getTitleHTML(content, level) {
 MarkdownAnalyser.getTitleHTML = getTitleHTML;
 
 /*
+ * Getting paragraph html.
+ * @param {string} content The processed content.
+ * @return {string} The paragraph html.
+ */
+function getParagraphHTML(content) {
+    return '<p>' + content + '</p>';
+}
+MarkdownAnalyser.getParagraphHTML = getParagraphHTML;
+
+/*
  * Getting bold text html.
  * @param {string} content The processed content.
  * @return {string} The bold text html.

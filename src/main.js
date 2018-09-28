@@ -15,21 +15,22 @@ function analyse(messageContent) {
     if (!messageContent) {
         return '';
     }
-    var htmlContent = '';
-    var key = '', storedChars = '';
-    var isLastChar = false, tempResult;
+    var htmlContent = '', currentTextLine = '';
+    var tempResult;
     for (var cursor = 0, length = messageContent.length; cursor < length; cursor++) {
         var char = messageContent[cursor];
-        if (char === '#') {
+        if (char === '\n') {
+            htmlContent += MDAnalyser.getParagraphHTML(currentTextLine);
+        } else if (char === '#' && (cursor === 0 || messageContent[cursor - 1] === '\n')) {
             tempResult = getTitleResult(messageContent, cursor);
             htmlContent += tempResult.text;
             cursor = tempResult.index - 1;     // 1 will be increased to cursor in loop.
         } else if (char === '*') {
             tempResult = getTextEffectResult(messageContent, cursor);
-            htmlContent += tempResult.text;
+            currentTextLine += tempResult.text;
             cursor = tempResult.index - 1;     // 1 will be increased to cursor in loop.
         } else {
-            htmlContent += char;
+            currentTextLine += char;
         }
     }
     return htmlContent;
@@ -57,7 +58,7 @@ function getTitleResult(content, index) {
             } else {
                 result = key + storedChars;
             }
-            result += char;
+            i--;
             break;
         } else {
             storedChars += char;
@@ -100,7 +101,8 @@ function getTextEffectResult(content, index) {
                 break;
             }
         } else if (char === '\r' || char === '\n') {
-            result = key + storedChars + char;
+            result = key + storedChars;
+            i--;
             break;
         } else {
             storedChars += char;
