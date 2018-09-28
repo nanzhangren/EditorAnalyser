@@ -4,7 +4,7 @@
  */
 
 
-var MarkdownAnalyser = require('./md-analyser');
+var MDAnalyser = require('./md-analyser');
 
 /*
  * Getting content result by analysing each char.
@@ -15,38 +15,99 @@ function analyse(messageContent) {
     if (!messageContent) {
         return '';
     }
-    var result = '';
+    var htmlContent = '';
     var key = '', storedChars = '';
-    var isLastChar = false;
-    for (var i = 0, length = messageContent.length; i < length; i++) {
-        var char = messageContent[i];
-        isLastChar = i === length - 1;
-        if (['#', '*', '`'].indexOf(char) >= 0) {
-            if (storedChars) {
-                var firstKeyChar = key[0];
-                if(char !== firstKeyChar) {   // No postfix match with prefix, treat the content as normal text.
-                    result += key + storedChars;
-                } else if (char === '*') {
-                    var nextChar = messageContent[i + 1];
-                    if ('*' === nextChar) {
-
-                    }
-                    result += key + storedChars;
-                }
-            } else {
-                key += char;
-            }
-        } else if (key) {
-            storedChars += char;
-        } else if (isLastChar && key.indexOf('#') === 0) {
-            if (key.length < 7) {   // title <h1> ~ <h6>
-                result += MarkdownAnalyser.getTitleText(storedChars, key.length);
-            } else {    // normal text
-                result += key + storedChars;
-            }
+    var isLastChar = false, tempResult;
+    for (var cursor = 0, length = messageContent.length; cursor < length; cursor++) {
+        var char = messageContent[cursor];
+        if (char === '#') {
+            tempResult = getTitleResult(messageContent, cursor);
+            htmlContent += tempResult.text;
+            cursor = tempResult.index - 1;     // 1 will be increased to cursor in loop.
+        } else if (char === '*') {
+            tempResult = getTextEffectResult(messageContent, cursor);
+            htmlContent += tempResult.text;
+            cursor = tempResult.index - 1;     // 1 will be increased to cursor in loop.
         } else {
-            result += char;
+            htmlContent += char;
         }
     }
-    return result;
+    return htmlContent;
+}
+
+/*
+ * Execute title processed logic.
+ * - Text starts with char '#' will be treated as title.
+ * - The maxmium continuous length of '#' is 6.
+ * - Once the continuous length of '#' is bigger than 6, the text line will be treated as normal text.
+ * @param {string} content The analysed content.
+ * @param {number} index The current cursor index.
+ * @return {Object} Title processed result.
+ */
+function getTitleResult(content, index) {
+    var key = '', storedChars = '';
+    var result;
+    for (var i = index, length = content.length; i < length; i++) {
+        var char = content[i];
+        if (char === '#') {
+            key += char;
+        } else if (char === '\r' || char === '\n') {
+            if (key.length <= 6) {
+                result = MDAnalyser.getTitleHTML(storedChars, key.length);
+            } else {
+                result = key + storedChars;
+            }
+            result += char;
+            break;
+        } else {
+            storedChars += char;
+        }
+    }
+    return {
+        text: result,
+        index: i
+    };
+}
+
+/*
+ * Execute bold text and italic text processed logic.
+ * - Text between two '**' will be treated as bold text.
+ * - Text between two '*' will be treated as italic text.
+ * @param {string} content The analysed content.
+ * @param {number} index The current cursor index.
+ * @return {Object} Title processed result.
+ */
+function getTextEffectResult(content, index) {
+    var key = '', storedChars = '';
+    var result;
+    for (var i = index, length = content.length; i < length; i++) {
+        var char = content[i];
+        if (char === '*') {
+            if (!storedChars) {
+                key += char;
+            } else {
+                if (key.length === 1) {         // start with '*'
+                    result = MDAnalyser.getItalicTextHTML(storedChars);
+                } else {                        // start with more than one '*'
+                    var nextChar = content[i + 1];
+                    if (nextChar === '*') {     // end with '**'
+                        result = key.substring(0, key.length - 2) + MDAnalyser.getBoldTextHTML(storedChars);
+                        i++;
+                    } else {                    // end with '*'
+                        result = key.substring(0, key.length - 1) + MDAnalyser.getItalicTextHTML(storedChars);
+                    }
+                }
+                break;
+            }
+        } else if (char === '\r' || char === '\n') {
+            result = key + storedChars + char;
+            break;
+        } else {
+            storedChars += char;
+        }
+    }
+    return {
+        text: result,
+        index: i
+    };
 }
